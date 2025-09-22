@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+
+{% block title %}Registrar Evento{% endblock %}
+
+{% block content %}
+<h2>Registrar Evento</h2>
+
+<form action="/evento" method="post" class="mb-4">
+  <div class="mb-3">
+    <label for="fecha" class="form-label">Fecha y hora <span class="text-danger">*</span></label>
+    <input type="datetime-local" class="form-control" id="fecha" name="fecha" required
+           value="{{ fecha_hoy if fecha_hoy is defined else '' }}">
+  </div>
+  <div class="mb-3">
+    <label for="tipo" class="form-label">Tipo de evento <span class="text-danger">*</span></label>
+    <select class="form-select" id="tipo" name="tipo" required>
+      <option value="" selected disabled>Seleccione...</option>
+      <optgroup label="Enfermedades o condiciones médicas">
+        <option value="Enfermedad aguda">Aparición de una enfermedad aguda (gripe, neumonía, infarto)</option>
+        <option value="Enfermedad crónica">Desarrollo de enfermedad crónica (diabetes, hipertensión, artritis)</option>
+        <option value="Complicación médica">Complicaciones médicas (insuficiencia renal en diabético)</option>
+      </optgroup>
+      <optgroup label="Eventos traumáticos o accidentales">
+        <option value="Accidente de tránsito">Accidente de tránsito</option>
+        <option value="Caída o fractura">Caída y fractura</option>
+        <option value="Lesión por quemadura/corte/aplastamiento">Lesión por quemadura, corte, aplastamiento</option>
+      </optgroup>
+      <optgroup label="Tratamientos médicos">
+        <option value="Efecto adverso de medicamentos">Efecto adverso de medicamentos</option>
+        <option value="Reacción alérgica">Reacción alérgica</option>
+        <option value="Infección asociada a procedimiento">Infección asociada a procedimiento médico</option>
+        <option value="Error médico o de medicación">Error médico o de medicación</option>
+      </optgroup>
+      <optgroup label="Eventos ambientales y sociales">
+        <option value="Exposición a contaminantes">Exposición a contaminantes (aire, agua, químicos)</option>
+        <option value="Desastre natural">Desastre natural (huracán, terremoto, inundación)</option>
+        <option value="Condiciones laborales nocivas">Condiciones laborales nocivas (ruido, toxinas, estrés laboral)</option>
+        <option value="Violencia o abuso">Violencia o abuso físico/psicológico</option>
+      </optgroup>
+      <optgroup label="Eventos del estilo de vida">
+        <option value="Consumo de sustancias">Consumo de tabaco, alcohol u otras drogas</option>
+        <option value="Sedentarismo">Sedentarismo</option>
+        <option value="Dieta poco saludable">Dieta poco saludable</option>
+        <option value="Estrés crónico o falta de sueño">Estrés crónico o falta de sueño</option>
+      </optgroup>
+      <optgroup label="Psicológicos y emocionales">
+        <option value="Estrés postraumático">Estrés postraumático</option>
+        <option value="Depresión o ansiedad">Depresión o ansiedad</option>
+        <option value="Pérdida de un ser querido">Pérdida de un ser querido</option>
+        <option value="Aislamiento social">Aislamiento social</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="mb-3">
+    <label for="evento" class="form-label">Descripción</label>
+    <textarea class="form-control" id="evento" name="evento" required></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Guardar</button>
+</form>
+
+{% if eventos %}
+<div class="accordion" id="accordionEventos">
+  {% for e in eventos %}
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingE{{ loop.index }}">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseE{{ loop.index }}">
+        {{ e["date"] }} - {{ e["tipo"] }}
+      </button>
+    </h2>
+    <div id="collapseE{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#accordionEventos">
+      <div class="accordion-body">
+        <p><strong>Evento:</strong> {{ e["evento"] }}</p>
+        <p><strong>Tipo:</strong> {{ e["type"] }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">No hay eventos registrados.</p>
+{% endif %}
+{% endblock %}

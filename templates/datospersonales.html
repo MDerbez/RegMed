@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Alta de Paciente
+{% endblock %}
+
+{% block content %}
+<form action="/datospersonales" method="post">
+    <h4>Datos Personales</h4>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="Nombre" class="form-label">Nombre</label>
+
+            <input type="text" class="form-control" id="Nombre" name="Nombre" required value="{{ datos.get('Nombre', '') }}">
+        </div>
+        <div class="col-md-4">
+            <label for="PrimerApellido" class="form-label">Primer Apellido</label>
+            
+            <input type="text" class="form-control" id="PrimerApellido" name="PrimerApellido" required value="{{ datos.get('PrimerApellido', '') }}">   
+        </div>
+        <div class="col-md-4">
+            <label for="SegundoApellido" class="form-label">Segundo Apellido</label>
+         
+            <input type="text" class="form-control" id="SegundoApellido" name="SegundoApellido" required value="{{ datos.get('SegundoApellido', '') }}">
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="FechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+            <input type="date" class="form-control" id="FechaNacimiento" name="FechaNacimiento" required value="{{ datos.get('FechaNacimiento', '') }}">
+        </div>
+
+        <div class="col-md-4">
+            <label for="SexoBiologico" class="form-label">Sexo Biológico</label>
+            <select class="form-select" id="SexoBiologico" name="SexoBiologico" required>
+                <option value="">Seleccione...</option>
+                <option value="1" {% if datos.get('SexoBiologico') == '1' %}selected{% endif %}>Masculino</option>
+                <option value="2" {% if datos.get('SexoBiologico') == '2' %}selected{% endif %}>Femenino</option>
+            </select>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="Genero" class="form-label">Género</label>
+            <select class="form-select" id="Genero" name="Genero" required>
+                <option value="">Seleccione...</option>
+                <option value="NO ESPECIFICADO" {% if datos.get('Genero') == 'NO ESPECIFICADO' %}selected{% endif %}>NO ESPECIFICADO</option>
+                <option value="MASCULINO" {% if datos.get('Genero') == 'MASCULINO' %}selected{% endif %}>MASCULINO</option>
+                <option value="FEMENINO" {% if datos.get('Genero') == 'FEMENINO' %}selected{% endif %}>FEMENINO</option>
+                <option value="TRANSGÉNERO" {% if datos.get('Genero') == 'TRANSGÉNERO' %}selected{% endif %}>TRANSGÉNERO</option>
+                <option value="TRANSEXUAL" {% if datos.get('Genero') == 'TRANSEXUAL' %}selected{% endif %}>TRANSEXUAL</option>
+                <option value="TRAVESTI" {% if datos.get('Genero') == 'TRAVESTI' %}selected{% endif %}>TRAVESTI</option>
+                <option value="INTERSEXUAL" {% if datos.get('Genero') == 'INTERSEXUAL' %}selected{% endif %}>INTERSEXUAL</option>
+                <option value="OTRO" {% if datos.get('Genero') == 'OTRO' %}selected{% endif %}>OTRO</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="CURP" class="form-label">CURP</label>
+            <input type="text" class="form-control" id="CURP" name="CURP" value="{{ datos.get('CURP', '') }}">
+        </div>
+        <div class="col-md-4">
+            <label for="Domicilio" class="form-label">Domicilio</label>
+            <input type="text" class="form-control" id="Domicilio" name="Domicilio" value="{{ datos.get('Domicilio', '') }}">
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="eMailPaciente" class="form-label">Email</label>
+            <input type="email" class="form-control" id="eMailPaciente" name="eMailPaciente" value="{{ datos.get('eMailPaciente', '') }}">
+        </div>
+        <div class="col-md-4">
+            <label for="TelefonoPaciente" class="form-label">Teléfono</label>
+            <input type="text" class="form-control" id="TelefonoPaciente" name="TelefonoPaciente" value="{{ datos.get('TelefonoPaciente', '') }}">
+        </div>
+        <div class="col-md-4">
+            <label for="WhatsAppPaciente" class="form-label">WhatsApp</label>
+            <input type="text" class="form-control" id="WhatsAppPaciente" name="WhatsAppPaciente" value="{{ datos.get('WhatsAppPaciente', '') }}">
+        </div>
+    </div>
+    <button class="btn btn-success w-100" type="submit">
+        Registrar Paciente
+    </button>
+</form>
+{% endblock %}

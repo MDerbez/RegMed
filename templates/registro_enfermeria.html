@@ -1,0 +1,302 @@
+{% extends "layout.html" %}
+{% import "macros.html" as ui %}
+{% block content %}
+
+<!-- ✅ Planes de cuidados (Supervisor) -->
+ {% if rol == 'supervisor' and planes_de_cuidados %}
+  <div class="card mb-3">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Planes de Cuidados (Supervisor)</h5>
+    </div> 
+  <div class="card-body">
+    {% if planes_de_cuidados %}
+      <div class="accordion" id="accordionSupervisorPlanes">
+        {% for r in planes_de_cuidados %}
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSup{{ loop.index }}">
+              <div class="d-flex w-100 align-items-center">
+                <button class="accordion-button collapsed py-1 flex-grow-1" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#collapseSup{{ loop.index }}">
+                  <strong>{{ r['fecha'] }}</strong> — <strong>{{ r['NombreCompleto'] }}</strong>
+                </button>
+                <form method="post" action="/" class="ms-2">
+                  <input type="hidden" name="expediente_paciente_id" value="{{ r['users_id'] }}">
+                  <button type="submit" class="btn btn-sm btn-outline-info">Ver expediente</button>
+                </form>
+              </div>
+            </h2>
+            <div id="collapseSup{{ loop.index }}" class="accordion-collapse collapse"
+                 data-bs-parent="#accordionSupervisorPlanes">
+              <div class="accordion-body py-2">
+                <ul class="mb-2">
+                  <li><strong>Estado mental:</strong> {{ r['estado_mental'] or 'Sin dato' }}</li>
+                  <li><strong>Riesgo caídas:</strong> {{ ui.mostrar_riesgo(r['riesgo_caidas']) }}</li>
+                  <li><strong>Riesgo úlceras:</strong> {{ ui.mostrar_riesgo(r['riesgo_ulceras']) }}</li>
+                  <li><strong>Riesgo pie diabético:</strong> {{ r['riesgo_pie_diabetico'] or 'Sin dato' }}</li>
+                  <li><strong>Heridas:</strong> {{ r['heridas'] or 'Sin dato' }}</li>
+                  <li><strong>Estomas:</strong> {{ r['estomas'] or 'Sin dato' }}</li>
+                  <li><strong>Aseo/Higiene:</strong> {{ r['aseo'] or 'Sin dato' }}</li>
+                  <li><strong>Medidas posturales:</strong> {{ r['medidas_posturales'] or 'Sin dato' }}</li>
+                  <li><strong>Balance líquidos:</strong> {{ r['balance_liquidos'] or 'Sin dato' }}</li>
+                  <li><strong>Dispositivos médicos:</strong> {{ r['dispositivos'] or 'Sin dato' }}</li>
+                  <li><strong>Cuidados vía aérea:</strong> {{ r['cuidados_via_aerea'] or 'Sin dato' }}</li>
+                  <li><strong>Comentarios:</strong> {{ r['comentarios'] or 'Sin comentarios' }}</li>
+                </ul>
+
+                <!-- Validación de supervisor -->
+                <form method="post" action="/validar_plan" class="mt-2">
+                  <input type="hidden" name="plan_id" value="{{ r['id'] }}">
+                  <div class="mb-2">
+                    <label for="comentarios_{{ r['id'] }}">Agregar comentario:</label>
+                    <textarea class="form-control" name="comentario" id="comentarios_{{ r['id'] }}" rows="2"></textarea>
+                  </div>
+                  <div class="mb-2">
+                    <label for="status_{{ r['id'] }}">Cambiar status:</label>
+                    <select class="form-select" name="status" id="status_{{ r['id'] }}">
+                      <option value="Pendiente de revisión" {% if r['status']=='Pendiente de revisión' %}selected{% endif %}>Pendiente de revisión</option>
+                      <option value="Aprobado" {% if r['status']=='Aprobado' %}selected{% endif %}>Aprobado</option>
+                      <option value="Rechazado" {% if r['status']=='Rechazado' %}selected{% endif %}>Rechazado</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-success">Guardar cambios</button>
+                  <button type="submit" class="btn btn-danger" name="accion" value="cancelar">Cancelar</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No hay planes pendientes de revisión.</p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- ✅ Expediente del paciente -->
+ {% if paciente and paciente.NombreCompleto %}
+<div class="card mb-3">
+  <div class="card-header bg-info text-white">
+    <h5 class="mb-0">Expediente del paciente</h5>
+  </div>
+  <div class="card-body p-2">
+    <div class="accordion" id="expedienteAccordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingExpediente">
+          <button class="accordion-button collapsed py-1" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapseExpediente">
+            {{ paciente['NombreCompleto'] if paciente else 'Expediente' }}
+            {% if paciente %} {{ ui.badge_alertas(paciente) }} {% endif %}
+          </button>
+        </h2>
+        <div id="collapseExpediente" class="accordion-collapse collapse" data-bs-parent="#expedienteAccordion">
+          <div class="accordion-body py-1">
+            {% if paciente %}
+              <ul class="mb-0">
+                <li><strong>Fecha nacimiento:</strong> {{ paciente['FechaNacimiento'] }}</li>
+                <li><strong>Sexo biológico:</strong> {{ paciente['SexoBiologico'] }}</li>
+                <li><strong>Género:</strong> {{ paciente['Genero'] }}</li>
+                <li><strong>Domicilio:</strong> {{ paciente['Domicilio'] }}</li>
+                <li><strong>Email:</strong> {{ paciente['eMailPaciente'] }}</li>
+                <li><strong>Teléfono:</strong> {{ paciente['TelefonoPaciente'] }}</li>
+                <li><strong>WhatsApp:</strong> {{ paciente['WhatsAppPaciente'] }}</li>
+              </ul>
+            {% else %}
+              <p class="text-muted">No hay paciente seleccionado.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  {% endif %}
+
+
+<!-- ✅ Plan de Cuidados Paciente -->
+{% if rol == 'paciente' and planes_de_cuidados %}
+  {% set ultimo = planes_de_cuidados[0] %}
+  <div class="card mb-3">
+    <div class="card-header bg-warning text-dark">
+      <h5 class="mb-0">Plan de Cuidados</h5>
+    </div>
+    <div class="card-body p-2">
+      <ul class="mb-0">
+        <li><strong>Fecha:</strong> {{ ultimo['fecha'] }}</li>
+        <li><strong>Estado mental:</strong> {{ ultimo['estado_mental'] or 'Sin dato' }}</li>
+        <li><strong>Riesgo caídas:</strong> {{ ui.mostrar_riesgo(ultimo['riesgo_caidas']) }}</li>
+        <li><strong>Riesgo úlceras:</strong> {{ ui.mostrar_riesgo(ultimo['riesgo_ulceras']) }}</li>
+        <li><strong>Riesgo pie diabético:</strong> {{ ultimo['riesgo_pie_diabetico'] or 'Sin dato' }}</li>
+        <li><strong>Dieta:</strong> {{ ultimo['dieta'] or 'Sin dato' }}</li>
+        <li><strong>Heridas:</strong> {{ ultimo['heridas'] or 'Sin dato' }}</li>
+        <li><strong>Estomas:</strong> {{ ultimo['estomas'] or 'Sin dato' }}</li>
+        <li><strong>Aseo/Higiene:</strong> {{ ultimo['aseo'] or 'Sin dato' }}</li>
+        <li><strong>Medidas posturales:</strong> {{ ultimo['medidas_posturales'] or 'Sin dato' }}</li>
+        <li><strong>Balance líquidos:</strong> {{ ultimo['balance_liquidos'] or 'Sin dato' }}</li>
+        <li><strong>Dispositivos médicos:</strong> {{ ultimo['dispositivos'] or 'Sin dato' }}</li>
+        <li><strong>Cuidados vía aérea:</strong> {{ ultimo['cuidados_via_aerea'] or 'Sin dato' }}</li>
+        <li><strong>Alérgico:</strong> {{ 'Sí' if ultimo['alergico'] else 'No' }}</li>
+      </ul>
+    </div>
+  </div>
+{% endif %}
+
+<!-- ✅ Plan de Cuidados Enfermería -->
+{% if rol == 'enfermeria' and planes_de_cuidados %}
+  {% set ultimo = planes_de_cuidados[0] %}
+  <div class="card mb-3">
+    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Plan de Cuidados</h5>
+      <span><strong>Status:</strong> {{ ultimo['status'] }}</span>
+    </div>
+    <div class="card-body p-2">
+      {% if ultimo['status'] != 'Rechazado' %}
+        <ul class="mb-0">
+          <li><strong>Fecha:</strong> {{ ultimo['fecha'] }}</li>
+          <li><strong>Estado mental:</strong> {{ ultimo['estado_mental'] or 'Sin dato' }}</li>
+          <li><strong>Riesgo caídas:</strong> {{ ui.mostrar_riesgo(ultimo['riesgo_caidas']) }}</li>
+          <li><strong>Riesgo úlceras:</strong> {{ ui.mostrar_riesgo(ultimo['riesgo_ulceras']) }}</li>
+          <li><strong>Riesgo pie diabético:</strong> {{ ultimo['riesgo_pie_diabetico'] or 'Sin dato' }}</li>
+          <li><strong>Dieta:</strong> {{ ultimo['dieta'] or 'Sin dato' }}</li>
+          <li><strong>Comentarios:</strong> {{ ultimo['comentarios'] or 'Sin comentarios' }}</li>
+        </ul>
+      {% endif %}
+
+      {% if ultimo['status'] == 'Rechazado' %}
+        <form method="post" action="/editar_plan_enfermeria">
+          <input type="hidden" name="plan_id" value="{{ ultimo['id'] }}">
+          <div class="mb-2">
+            <label>Estado Mental</label>
+            <input type="text" class="form-control" name="estado_mental" value="{{ ultimo['estado_mental'] }}">
+          </div>
+          <div class="mb-2">
+            <label>Riesgo caídas</label>
+            <select class="form-select" name="riesgo_caidas">
+              <option value="1" {% if ultimo['riesgo_caidas']==1 %}selected{% endif %}>Sí</option>
+              <option value="0" {% if ultimo['riesgo_caidas']==0 %}selected{% endif %}>No</option>
+              <option value="" {% if not ultimo['riesgo_caidas'] %}selected{% endif %}>Sin dato</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label>Riesgo úlceras</label>
+            <select class="form-select" name="riesgo_ulceras">
+              <option value="1" {% if ultimo['riesgo_ulceras']==1 %}selected{% endif %}>Sí</option>
+              <option value="0" {% if ultimo['riesgo_ulceras']==0 %}selected{% endif %}>No</option>
+              <option value="" {% if not ultimo['riesgo_ulceras'] %}selected{% endif %}>Sin dato</option>
+            </select>
+          </div>
+          <div class="mb-2">
+            <label>Comentarios previos:</label>
+            <textarea class="form-control" rows="3" readonly>{{ ultimo['comentarios'] }}</textarea>
+          </div>
+          <div class="mb-2">
+            <label>Agregar comentario:</label>
+            <textarea class="form-control" name="comentario_nuevo" rows="2" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 mt-3">Enviar correcciones</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+<!-- ✅ Aquí puedes seguir con Somatometría, Síntomas, Eventos, Documentos, Autorizaciones -->
+<!-- (ya con la misma lógica de simplificación y uso de macros) -->
+
+<!-- ✅ Registrar Plan de Cuidados (Enfermería) -->
+{% if rol == 'enfermeria' %}
+  <div class="card mb-3">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Registrar Plan de Cuidados</h5>
+    </div>
+    <div class="card-body">
+      <form method="post">
+        <div class="mb-2">
+          <label>Acciones</label>
+          <textarea class="form-control" name="acciones"></textarea>
+        </div>
+        <div class="mb-2">
+          <label>Detecciones</label>
+          <textarea class="form-control" name="detecciones"></textarea>
+        </div>
+        <div class="mb-2">
+          <label>Comentarios</label>
+          <textarea class="form-control" name="comentarios"></textarea>
+        </div>
+        <!-- Primera línea -->
+        <div class="row mb-2">
+          <div class="col-md-3">
+            <label>Estado mental</label>
+            <input type="text" class="form-control" name="estado_mental" required>
+          </div>
+          <div class="col-md-3">
+            <label>Riesgo caídas</label>
+            <select class="form-select" name="riesgo_caidas">
+              <option value="1">Sí</option>
+              <option value="0">No</option>
+              <option value="">Sin dato</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label>Riesgo úlceras</label>
+            <select class="form-select" name="riesgo_ulceras">
+              <option value="1">Sí</option>
+              <option value="0">No</option>
+              <option value="">Sin dato</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label>Riesgo pie diabético</label>
+            <input type="text" class="form-control" name="riesgo_pie_diabetico">
+          </div>
+        </div>
+        <!-- Segunda línea -->
+        <div class="row mb-2">
+          <div class="col-md-4">
+            <label>Heridas</label>
+            <input type="text" class="form-control" name="heridas">
+          </div>
+          <div class="col-md-4">
+            <label>Estomas</label>
+            <input type="text" class="form-control" name="estomas">
+          </div>
+          <div class="col-md-4">
+            <label>Aseo/Higiene</label>
+            <input type="text" class="form-control" name="aseo">
+          </div>
+        </div>
+        <!-- Tercera línea -->
+        <div class="row mb-2">
+          <div class="col-md-6">
+            <label>Medidas posturales</label>
+            <input type="text" class="form-control" name="medidas_posturales">
+          </div>
+          <div class="col-md-6">
+            <label>Balance líquidos</label>
+            <input type="text" class="form-control" name="balance_liquidos">
+          </div>
+        </div>
+        <!-- Cuarta línea -->
+        <div class="row mb-2">
+          <div class="col-md-6">
+            <label>Dispositivos médicos</label>
+            <input type="text" class="form-control" name="dispositivos">
+          </div>
+          <div class="col-md-6">
+            <label>Cuidados vía aérea</label>
+            <input type="text" class="form-control" name="cuidados_via_aerea">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-success w-100 mt-2">Guardar Plan de Cuidados</button>
+      </form>
+    </div>
+  </div>
+{% endif %}
+
+<script>
+  function mostrarEdicion(id) {
+    let div = document.getElementById('edicion-' + id);
+    div.style.display = div.style.display === 'none' || div.style.display === '' ? 'block' : 'none';
+  }
+</script>
+
+{% endblock %}

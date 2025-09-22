@@ -1,0 +1,127 @@
+Diapositiva 1:
+Proyecto RegMed para curso CS50
+
+Diapositiva 2:
+La pantalla inicial permite ingresar las credenciales de usuario, o registrar una nueva cuenta
+
+Diapositiva 3:
+Para cuentas nuevas, se solicita el rol: Paciente, Enfermera, Supervisor
+
+Diapositiva 4:
+Rol de paciente.
+El paciente podrá registrar eventos que pueden impactar su salud (sucesos o hechos observables, como fiebre, sangrado, caída) y síntomas (manifestación subjetiva no cuantificable como dolor, ansiedad, mareo). También podrá autorizar a otros usuarios a ver su expediente (y revocar la autorización).
+También le será visible el Plan de Cuidados y las prescripciones.
+
+Diapositiva 5:
+Para Pacientes, se solicitan datos personales.
+
+Diapositiva 6:
+Después del registro, el paciente verá una pantalla con diferentes apartados que se irán llenando conforme se registre información, ya sea por el paciente o por la enfermera.
+
+Diapositiva 7:
+Todos los usuarios pueden cambiar su contraseña a voluntad
+
+Diapositiva 8:
+El paciente puede registrar diferentes tipos de síntomas,
+
+Diapositiva 9:
+Y su percepción de inensidad
+
+Diapositiva 10:
+Además de un tiempo estimado, puede agregar el detalle que consiere necesario.
+
+Diapositiva 11:
+Después de registrar, ya aparece en la sección de síntomas
+
+Diapositiva 12:
+El paciente también puede registrar eventos que puedan impactar sus cuidados
+
+Diapositiva 13:
+Primero específica el Tipo de evento, y luego una descrición
+
+Diapositiva 14:
+Una vez registrado, aparece en la ventana de Eventos
+
+Diapositiva 15:
+Tanto el paciente como la enfermera pueden registrar datos somatométricos
+
+Diapositiva 16:
+Estos aparecerán en la ventana correspondiente
+
+Diapositiva 17:
+El paciente podrá autorizar el acceso a su expediente a quien considere necesario, agregando aquí su correo electrónico.
+
+Diapositiva 18:
+
+
+Diapositiva 19:
+El paciente también podrá agregar documentos PDF, tales como resultados de estudios, indicaciones médicas, prescripciones,…
+
+Diapositiva 20:
+Se debe tipificar el documento y seleccionarlo.
+
+Diapositiva 21:
+Una vez guardado, aparecerá en la ventana correspondiente
+
+Diapositiva 22:
+Toda la información se puede expandir para ver el detalle.
+
+Diapositiva 23:
+La enfermera podrá registrar nuevo Plan de Cuidados cuando sea requerido. Podrá ver los expedientes de todos los pacientes. También podrá registrar la somatometría del paciente.
+Podrá consultar los eventos y síntomas registrados por el paciente.
+Podrá ver en el Plan de Cuidados los comentarios del supervisor, en caso de que lo rechace. Podrá hacer los ajustes y enviar comentarios al supervisor hasta que sea aceptado.
+
+Diapositiva 24:
+Una vez registrada en el sistema, la enfermera debe seleccionar el paciente con el que trabajará
+
+Diapositiva 25:
+Una vez seleccionado el paciente
+
+Diapositiva 26:
+Le aparecerán tanto los datos registrados por el paciente, y le permitirá agregar información
+
+Diapositiva 27:
+La enfermera registra el Plan de Cuidados, basado en indicaciones médicas y el tipo de cuidados solicitados. E.ste Plan de Cuidados está sujeto a la revisión del supervisor
+
+Diapositiva 28:
+La enfermera también puede registrar las prescripciones
+
+Diapositiva 29:
+La información aparece catalogada
+
+Diapositiva 30:
+Para poder hacer cálculos de consumo
+
+Diapositiva 31:
+Detallando frecuencia, cantidad y ventana de tiempo
+
+Diapositiva 32:
+Toda esta información también se agrega a la pantalla
+
+Diapositiva 33:
+El supervisor tendrá a la vista los Planes de cuidados pendientes de aprobación. Tendrá a la vista y podrá consultar el resto de la información. Puede aceptar o rechazar los planes. En este caso se abre un campo para presentárselo a enfermería y explicar el motivo del rechazo.
+
+Diapositiva 34:
+El supervisor podrá ver los Planes de Cuidado para diferentes pacientes.
+
+Diapositiva 35:
+Podrá ver el expediente de cuidados de cualquier paciente de su lista
+
+Diapositiva 36:
+Y podrá revisar y aprobar, rechazar o cancelar Planes de Cuidados
+
+Diapositiva 37:
+En el caso de rechazo, cuenta con un campo de comentarios para detallar el motivo del rechazo.
+
+Diapositiva 38:
+
+
+Diapositiva 39:
+Cuando un plan es rechazado, le aparece a la enfermera el formulario para su corrección
+
+Diapositiva 40:
+Esta comunicación es constante, hasta que el supervisor aprueba el Plan de Cuidados
+
+Diapositiva 41:
+Este le aparecerá con status de aprobado.
+

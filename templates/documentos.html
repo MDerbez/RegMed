@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% block title %}Subir Documento{% endblock %}
+{% block content %}
+<form action="/documentos" method="post" enctype="multipart/form-data" class="card p-4">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="fecha" class="form-label">Fecha del documento</label>
+            <input type="date" class="form-control" name="fecha" required>
+        </div>
+        <div class="col-md-6">
+            <label for="tipo" class="form-label">Tipo de documento</label>
+            <select class="form-select" name="tipo" required>
+                <option value="">Seleccione...</option>
+                <option value="Rayos X">Rayos X (Radiografías)</option>
+                <option value="Tomografía Computarizada">Tomografía Computarizada (TAC o CT)</option>
+                <option value="Resonancia Magnética">Resonancia Magnética (RM o MRI)</option>
+                <option value="Ultrasonido">Ultrasonido (Ecografía)</option>
+                <option value="Medicina Nuclear">Medicina Nuclear</option>
+                <option value="PET">PET (Tomografía por Emisión de Positrones)</option>
+                <option value="Fluoroscopia">Fluoroscopia</option>
+                <option value="Laboratorio - Sangre">Laboratorio - Sangre (biometría hemática, química sanguínea, pruebas de coagulación, serologías)</option>
+                <option value="Laboratorio - Orina">Laboratorio - Orina (examen general de orina, urocultivo, pruebas de proteínas)</option>
+                <option value="Laboratorio - Heces">Laboratorio - Heces (coproparasitoscópico, sangre oculta, cultivos)</option>
+                <option value="Laboratorio - Otros líquidos">Laboratorio - Otros líquidos corporales (líquido cefalorraquídeo, pleural, peritoneal, sinovial, etc.)</option>
+                <option value="Laboratorio - Tejidos y células">Laboratorio - Tejidos y células (biopsias, citologías, Papanicolaou)</option>
+                <option value="Otros">Otros</option>
+            </select>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="tema" class="form-label">Tema</label>
+        <input type="text" class="form-control" name="tema" required>
+    </div>
+    <div class="mb-3">
+        <label for="comentarios" class="form-label">Comentarios</label>
+        <textarea class="form-control" name="comentarios"></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="archivo" class="form-label">Archivo PDF</label>
+        <input type="file" class="form-control" name="archivo" accept=".pdf" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar Documento</button>
+</form>
+<hr>
+<h5>Mis documentos</h5>
+<ul>
+    {% for doc in documentos %}
+        <li>{{ doc['fecha'] }} — {{ doc['tipo'] }} - {{ doc['tema'] }}
+            <a href="{{ url_for('static', filename='uploads/' ~ doc['filename']) }}" target="_blank">Ver PDF</a>
+            <a href="/documentos?delete={{ doc['id'] }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este documento?')">Eliminar</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

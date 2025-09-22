@@ -1,0 +1,169 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3>Registrar Somatometría</h3>
+  <form id="somatometriaForm" method="post">
+    <div class="row mb-2">
+      <div class="col-md-3">
+        <label for="fecha">Fecha</label>
+        <input type="datetime-local" class="form-control" id="fecha" name="fecha" required value="{{ fecha_hoy }}">
+      </div>
+      <div class="col-md-3">
+        <label for="peso">Peso (kg)</label>
+        <input type="text" maxlength="7" class="form-control" id="peso" name="peso" pattern="^\d{1,3}(\.\d{1,3})?$|^999$" title="Formato ###.###, entre 1 y 400, o 999 si se desconoce">
+      </div>
+      <div class="col-md-3">
+        <label for="talla">Talla (cm)</label>
+        <input type="text" maxlength="3" class="form-control" id="talla" name="talla" pattern="^\d{2,3}$|^999$" title="Entre 30 y 220, o 999 si se desconoce">
+      </div>
+      <div class="col-md-3">
+        <label for="circ_abdominal">Circunferencia abdominal (cm)</label>
+        <input type="text" maxlength="3" class="form-control" id="circ_abdominal" name="circ_abdominal" pattern="^\d{2,3}$|^0$" title="Entre 20 y 300, o 0 si se desconoce">
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-md-3">
+        <label for="sistolica">sistolica (mmHg)</label>
+        <input type="text" maxlength="3" class="form-control" id="sistolica" name="sistolica" pattern="^\d{2,3}$|^0$" title="Entre 50 y 300 si diastolica ≠ 0, o 0 si se desconoce">
+      </div>
+      <div class="col-md-3">
+        <label for="diastolica">diastolica (mmHg)</label>
+        <input type="text" maxlength="3" class="form-control" id="diastolica" name="diastolica" pattern="^\d{2,3}$|^0$" title="Entre 20 y 200 si sistolica ≠ 0, o 0 si se desconoce">
+      </div>
+      <div class="col-md-3">
+        <label for="fcard">Frecuencia cardíaca (lpm)</label>
+        <input type="text" maxlength="3" class="form-control" id="fcard" name="fcard" pattern="^\d{2,3}$|^0$" title="Entre 40 y 220, o 0 si se desconoce">
+      </div>
+      <div class="col-md-3">
+        <label for="fresp">Frecuencia respiratoria (rpm)</label>
+        <input type="text" maxlength="2" class="form-control" id="fresp" name="fresp" pattern="^\d{2}$|^0$" title="Entre 10 y 99, o 0 si se desconoce">
+      </div>
+    </div>
+    <div class="row mb-2">
+      <div class="col-md-3">
+        <label for="temp">Temperatura (°C)</label>
+        <input type="text" maxlength="4" class="form-control" id="temp" name="temp" pattern="^\d{2}(\.\d)?$|^0$" title="Formato ##.#, entre 30 y 44, o 0 si se desconoce">
+      </div>
+      <div class="col-md-3">
+        <label for="o2">Oximetría (%)</label>
+        <input type="text" maxlength="3" class="form-control" id="o2" name="o2" pattern="^\d{1,3}$|^0$" title="Entre 1 y 100, o 0 si se desconoce">
+      </div>
+      <div class="col-md-3">
+        <label for="glucemia">Glucemia (mg/dL)</label>
+        <input type="text" maxlength="3" class="form-control" id="glucemia" name="glucemia" pattern="^\d{2,3}$|^0$" title="Entre 20 y 999, o 0 si se desconoce">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-success mt-3">Guardar registro</button>
+  </form>
+  <div id="errorMsg" class="alert alert-danger mt-3" style="display:none"></div>
+</div>
+
+<script>
+document.getElementById('somatometriaForm').addEventListener('submit', function(e) {
+  let peso = document.getElementById('peso').value.trim();
+  let talla = document.getElementById('talla').value.trim();
+  let circ_abdominal = document.getElementById('circ_abdominal').value.trim();
+  let sistolica = document.getElementById('sistolica').value.trim();
+  let diastolica = document.getElementById('diastolica').value.trim();
+  let fcard = document.getElementById('fcard').value.trim();
+  let fresp = document.getElementById('fresp').value.trim();
+  let temp = document.getElementById('temp').value.trim();
+  let o2 = document.getElementById('o2').value.trim();
+  let glucemia = document.getElementById('glucemia').value.trim();
+
+  // Validación: al menos un campo distinto de fecha debe tener valor
+  if (
+    !peso && !talla && !circ_abdominal && !sistolica && !diastolica &&
+    !fcard && !fresp && !temp && !o2 && !glucemia
+  ) {
+    e.preventDefault();
+    mostrarError('Debes ingresar al menos un valor de somatometría además de la fecha.');
+    return;
+  }
+
+  // Validaciones específicas
+  // Peso
+  if (peso && peso !== "999") {
+    if (!/^\d{1,3}(\.\d{1,3})?$/.test(peso) || Number(peso) < 1 || Number(peso) > 400) {
+      e.preventDefault(); mostrarError('Peso debe estar entre 1 y 400 kg, formato ###.###, o 999 si se desconoce.'); return;
+    }
+  }
+
+  // Talla
+  if (talla && talla !== "999") {
+    if (!/^\d{2,3}$/.test(talla) || Number(talla) < 30 || Number(talla) > 220) {
+      e.preventDefault(); mostrarError('Talla debe estar entre 30 y 220 cm, o 999 si se desconoce.'); return;
+    }
+  }
+
+  // Circunferencia abdominal
+  if (circ_abdominal && circ_abdominal !== "0") {
+    if (!/^\d{2,3}$/.test(circ_abdominal) || Number(circ_abdominal) < 20 || Number(circ_abdominal) > 300) {
+      e.preventDefault(); mostrarError('Circunferencia abdominal debe estar entre 20 y 300 cm, o 0 si se desconoce.'); return;
+    }
+  }
+
+  // Sistolica y Diastolica
+  if (sistolica && diastolica) {
+    if (diastolica !== "0") {
+      if (sistolica === "0" || Number(sistolica) < 50 || Number(sistolica) > 300) {
+        e.preventDefault(); mostrarError('sistolica debe estar entre 50 y 300 mmHg si diastolica ≠ 0, o 0 si se desconoce.'); return;
+      }
+      if (Number(sistolica) < Number(diastolica)) {
+        e.preventDefault(); mostrarError('sistolica no puede ser menor que diastolica.'); return;
+      }
+    }
+    if (sistolica !== "0") {
+      if (diastolica === "0" || Number(diastolica) < 20 || Number(diastolica) > 200) {
+        e.preventDefault(); mostrarError('diastolica debe estar entre 20 y 200 mmHg si sistolica ≠ 0, o 0 si se desconoce.'); return;
+      }
+      if (Number(diastolica) > Number(sistolica)) {
+        e.preventDefault(); mostrarError('diastolica no puede ser mayor que sistolica.'); return;
+      }
+    }
+  }
+
+  // Frecuencia cardíaca
+  if (fcard && fcard !== "0") {
+    if (!/^\d{2,3}$/.test(fcard) || Number(fcard) < 40 || Number(fcard) > 220) {
+      e.preventDefault(); mostrarError('Frecuencia cardíaca debe estar entre 40 y 220 lpm, o 0 si se desconoce.'); return;
+    }
+  }
+
+  // Frecuencia respiratoria
+  if (fresp && fresp !== "0") {
+    if (!/^\d{2}$/.test(fresp) || Number(fresp) < 10 || Number(fresp) > 99) {
+      e.preventDefault(); mostrarError('Frecuencia respiratoria debe estar entre 10 y 99 rpm, o 0 si se desconoce.'); return;
+    }
+  }
+
+  // Temperatura
+  if (temp && temp !== "0") {
+    if (!/^\d{2}(\.\d)?$/.test(temp) || Number(temp) < 30 || Number(temp) > 44) {
+      e.preventDefault(); mostrarError('Temperatura debe estar entre 30 y 44 °C, formato ##.#, o 0 si se desconoce.'); return;
+    }
+  }
+
+  // Oximetría
+  if (o2 && o2 !== "0") {
+    if (!/^\d{1,3}$/.test(o2) || Number(o2) < 1 || Number(o2) > 100) {
+      e.preventDefault(); mostrarError('Oximetría debe estar entre 1 y 100 %, o 0 si se desconoce.'); return;
+    }
+  }
+
+  // Glucemia
+  if (glucemia && glucemia !== "0") {
+    if (!/^\d{2,3}$/.test(glucemia) || Number(glucemia) < 20 || Number(glucemia) > 999) {
+      e.preventDefault(); mostrarError('Glucemia debe estar entre 20 y 999 mg/dL, o 0 si se desconoce.'); return;
+    }
+  }
+
+  function mostrarError(msg) {
+    let div = document.getElementById('errorMsg');
+    div.innerText = msg;
+    div.style.display = 'block';
+    window.scrollTo(0,0);
+  }
+});
+</script>
+{% endblock %}

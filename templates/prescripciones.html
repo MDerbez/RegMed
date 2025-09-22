@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+{% block title %}Prescripciones{% endblock %}
+{% block content %}
+{% if session.get('rol') == 'enfermeria' %}
+<form action="/prescripciones" method="post" class="card p-4 mb-3">
+    <!-- ...formulario de registro de prescripción... -->
+    <div class="row mb-2">
+        <div class="col-md-3">
+            <label for="medicamento" class="form-label">Medicamento</label>
+            <input type="text" class="form-control" name="medicamento" required>
+        </div> 
+        <div class="col-md-2">
+            <label for="dosis" class="form-label">Dosis</label>
+            <input type="text" class="form-control" name="dosis" required>
+        </div>
+        <div class="col-md-2">
+            <label for="via" class="form-label">Vía</label>
+            <select class="form-select" name="via" required>
+                <option value="bucal">Bucal</option>
+                <option value="cutánea">Cutánea</option>
+                <option value="inhalatoria">Inhalatoria</option>
+                <option value="nasal">Nasal</option>
+                <option value="oftálmica">Oftálmica</option>
+                <option value="oral" selected>Oral</option>
+                <option value="rectal">Rectal</option>
+                <option value="sublingual">Sublingual</option>
+                <option value="transdérmica">Transdérmica</option>
+                <option value="vaginal">Vaginal</option>
+                <option value="ótica">Ótica</option>
+            </select>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-2">
+            <label for="cantidad" class="form-label">Cantidad</label>
+            <input type="number" class="form-control" name="cantidad" required>
+        </div>
+        <div class="col-md-3">
+            <label for="unidad_medida" class="form-label">Unidad de medida</label>
+            <select class="form-select" name="unidad_medida" required>
+                <option value="tabletas">Tabletas</option>
+                <option value="grageas">Grageas</option>
+                <option value="cápsulas">Cápsulas</option>
+                <option value="sobre">Sobre</option>
+                <option value="supositorios/óvulos">Supositorios/óvulos</option>
+                <option value="mL">mL</option>
+                <option value="mg/mL">mg/mL</option>
+                <option value="%">%</option>
+                <option value="gotas">Gotas</option>
+                <option value="ampolletas">Ampolletas</option>
+                <option value="parche">Parche</option>
+                <option value="aplicacion">Aplicación</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="cada_cantidad" class="form-label">Cada (cantidad)</label>
+            <input type="number" class="form-control" name="cada_cantidad" required>
+        </div>
+        <div class="col-md-3">
+            <label for="cada_unidad" class="form-label">Cada (unidad)</label>
+            <select class="form-select" name="cada_unidad" required>
+                <option value="horas">Horas</option>
+                <option value="dias">Días</option>
+                <option value="semanas">Semanas</option>
+                <option value="meses">Meses</option>
+            </select>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md-3">
+            <label for="desde" class="form-label">Desde</label>
+            <input type="text" class="form-control" name="desde" required value="{{ now.strftime('%d-%m-%Y') }}" placeholder="dd-mm-aaaa">
+        </div>
+        <div class="col-md-2">
+            <label for="durante_cantidad" class="form-label">Durante (cantidad)</label>
+            <input type="number" class="form-control" name="durante_cantidad" required>
+        </div>
+        <div class="col-md-3">
+            <label for="durante_unidad" class="form-label">Durante (unidad)</label>
+            <select class="form-select" name="durante_unidad" required>
+                <option value="horas">Horas</option>
+                <option value="dias" selected>Días</option>
+                <option value="semanas">Semanas</option>
+                <option value="meses">Meses</option>
+            </select>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Registrar Prescripción</button>
+</form>
+{% if session.get('rol') == 'enfermeria' %}
+<div class="mt-3 text-center">
+    <a href="/" class="btn btn-secondary">Ir a inicio</a>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

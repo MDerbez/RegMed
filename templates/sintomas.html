@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block title %}Registrar Síntomas{% endblock %}
+
+{% block content %}
+<h2>Registrar Síntomas</h2>
+
+<form action="/sintomas" method="post" class="mb-4">
+  <div class="mb-3">
+      <label for="tipo" class="form-label">Tipo de síntoma <span class="text-danger">*</span></label>
+      <select class="form-select" id="tipo" name="tipo" required>
+          <option value="" selected disabled>Seleccione...</option>
+          <optgroup label="Neurológico">
+              <option value="Dolor de cabeza">Dolor de cabeza</option>
+              <option value="Mareos">Mareos</option>
+              <option value="Convulsiones">Convulsiones</option>
+              <option value="Hormigueo">Hormigueo</option>
+              <option value="Pérdida de fuerza">Pérdida de fuerza</option>
+              <option value="Alteraciones de la memoria">Alteraciones de la memoria</option>
+          </optgroup>
+          <optgroup label="Respiratorio">
+              <option value="Tos">Tos</option>
+              <option value="Dificultad para respirar">Dificultad para respirar</option>
+              <option value="Congestión nasal">Congestión nasal</option>
+              <option value="Dolor de garganta">Dolor de garganta</option>
+          </optgroup>
+          <optgroup label="Digestivo">
+              <option value="Náusea">Náusea</option>
+              <option value="Diarrea">Diarrea</option>
+              <option value="Vómito">Vómito</option>
+              <option value="Dolor abdominal">Dolor abdominal</option>
+          </optgroup>
+          <optgroup label="General">
+              <option value="Fiebre">Fiebre</option>
+              <option value="Fatiga">Fatiga</option>
+              <option value="Pérdida de apetito">Pérdida de apetito</option>
+          </optgroup>
+          <option value="Otro">Otro</option>
+      </select>
+  </div>
+
+  <div class="mb-3">
+      <label for="intensidad" class="form-label">Intensidad <span class="text-danger">*</span></label>
+      <select class="form-select" id="intensidad" name="intensidad" required>
+          <option value="" selected disabled>Seleccione...</option>
+          <option value="Leve">Leve: Puede realizar actividades habituales. | Ejemplo: Se me durmió la rodilla en el cine</option>
+          <option value="Moderada">Moderada: Disminuye actividades habituales. | Ejemplo: Tuve que acostarme por dolor</option>
+          <option value="Intensa">Intensa: Incapacitante, no puede realizar actividades. | Ejemplo: Fui a urgencias por el dolor</option>
+          <option value="Muy intensa">Muy intensa: Requiere intervención médica inmediata. | Ejemplo: Me desmayé por el síntoma</option>
+      </select>
+    </div>
+
+  <div class="mb-3">
+    <label for="duracion" class="form-label">Duración</label>
+    <input type="text" class="form-control" id="duracion" name="duracion" required placeholder="Ej: 3 minutos, 2 horas, 30 seg">
+  </div>
+  <div class="mb-3">
+    <label for="descripcion" class="form-label">Descripción</label>
+    <textarea class="form-control" id="descripcion" name="descripcion" required></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Guardar</button>
+</form> 
+
+{% if sintomas %}
+<div class="accordion" id="accordionSintomas">
+  {% for s in sintomas %}
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingS{{ loop.index }}">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseS{{ loop.index }}">
+        {{ s["date"] }} - {{ s["tipo"] }}
+      </button>
+    </h2>
+    <div id="collapseS{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#accordionSintomas">
+      <div class="accordion-body">
+        <p><strong>Duración:</strong> {{ s["duracion"] }}</p>
+        <p><strong>Intensidad:</strong> {{ s["intensidad"] }}</p>
+        <p><strong>Descripción:</strong> {{ s["descripcion"] }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">No hay síntomas registrados.</p>
+{% endif %}
+{% endblock %}

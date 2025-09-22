@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Seleccionar Paciente{% endblock %}
+{% block content %}
+<h4>Seleccione el paciente a atender</h4>
+<form method="post" class="card p-4 mb-3">
+    <div class="mb-3">
+        <label for="paciente_id" class="form-label">Paciente</label>
+        <select class="form-select" name="paciente_id" required>
+            <option value="">Seleccione...</option>
+            {% for p in pacientes %}
+                <option value="{{ p['usersid'] }}">{{ p['NombreCompleto'] }}</option>
+
+            {% endfor %}
+        </select>
+    </div>  
+    <button type="submit" class="btn btn-primary">Continuar</button>
+</form>
+{% endblock %}

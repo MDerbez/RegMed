@@ -1,0 +1,21 @@
+{% macro mostrar_riesgo(valor) %}
+  {% if valor == '1' or valor == 1 %}
+    <span class="text-danger fw-bold">Sí</span>
+  {% elif valor == '0' or valor == 0 %}
+    No
+  {% else %}
+    <span class="text-muted">Sin dato</span>
+  {% endif %}
+{% endmacro %}
+
+{% macro badge_alertas(paciente) %}
+  {% if paciente['Alergico'] %}
+    <span class="badge bg-danger ms-2">Alérgico</span>
+  {% endif %}
+  {% if paciente['RiesgoCaidas'] %}
+    <span class="badge bg-danger ms-2">Riesgo de caídas</span>
+  {% endif %}
+  {% if paciente['RiesgoUlceras'] %}
+    <span class="badge bg-danger ms-2">Riesgo de úlceras</span>
+  {% endif %}
+{% endmacro %}

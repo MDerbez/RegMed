@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Autorizaciones
+{% endblock %}
+
+{% block content %}
+<div class="card p-4 shadow-sm rounded-3">
+    <h4>Autorización de acceso al expediente</h4>
+    <form action="/autacceso" method="post">
+        <div class="mb-3">
+            <label for="correo" class="form-label">
+                Autorizo al correo electrónico siguiente para acceder a mi expediente
+            </label>
+            <input class="form-control" id="correo" name="correo" placeholder="Correo electrónico" type="email" required>
+        </div>
+        <button class="btn btn-success w-100" type="submit">
+            Registrar autorización
+        </button>
+    </form>
+</div>
+
+<!-- Acordeón de autorizaciones existentes -->
+<div class="mt-4">
+    {% if autorizaciones %}
+        <div class="accordion" id="accordionAutorizaciones">
+            {% for a in autorizaciones %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingA{{ loop.index }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseA{{ loop.index }}" aria-expanded="false" aria-controls="collapseA{{ loop.index }}">
+                        {{ a.date }} - {{ a.evento }}
+                    </button>
+                </h2>
+                <div id="collapseA{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="headingA{{ loop.index }}" data-bs-parent="#accordionAutorizaciones">
+                    <div class="accordion-body">
+                        <p><strong>Tipo:</strong> Autorización</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted mt-3">No hay autorizaciones registradas.</p>
+    {% endif %}
+</div>
+{% endblock %}
