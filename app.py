@@ -1,9 +1,5 @@
 import os
 import sqlite3
-
-
-
-
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -14,6 +10,9 @@ from helpers import apology, login_required, mxn, valida
 
 # Configure application
 app = Flask(__name__)
+
+# Configuración para producción
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
 
 def obtener_planes_de_cuidados(paciente_id):
     conn = get_db_connection()
@@ -29,7 +28,9 @@ from datetime import datetime
 from helpers import apology, login_required, mxn, valida
 
 def get_db_connection():
-    conn = sqlite3.connect("nombre_de_tu_base_de_datos.db")
+    # Usar la base de datos correcta
+    db_path = os.path.join(os.path.dirname(__file__), "pacientes.db")
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -615,3 +616,7 @@ def registrar_usuario(username, password, rol, nombre_completo):
         )
     conn.commit()
     conn.close()
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
