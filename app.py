@@ -224,6 +224,7 @@ def index():
     autorizaciones = []
     documentos = []
     prescripciones = []
+    somatometria_registros = []  # ← Inicializar aquí
  
     if user["rol"] == "supervisor":
         # Mostrar todos los planes de cuidados pendientes
@@ -302,7 +303,7 @@ def index():
         somatometria_registros = somatometria
         conn.close()
 
-    # Ordenamiento seguro
+        # Ordenamiento seguro
         planes_de_cuidados = sorted(planes_de_cuidados, key=lambda r: r['fecha'], reverse=True)
         sintomas = sorted(sintomas, key=lambda s: s['date'], reverse=True)
         somatometria = sorted(somatometria, key=lambda s: s['fecha'], reverse=True)
@@ -317,8 +318,8 @@ def index():
         username=user["username"],
         rol=rol,
         paciente=paciente,
-        plan_de_cuidados=planes,  # ← CORREGIDO
-        ultimo_plan=planes[0] if planes else None,  # ← CORREGIDO
+        plan_de_cuidados=planes_de_cuidados,  # ← CORREGIDO: usar planes_de_cuidados
+        ultimo_plan=planes_de_cuidados[0] if planes_de_cuidados else None,  # ← CORREGIDO
         sintomas=sintomas,
         eventos=eventos,
         somatometria=somatometria_registros,
