@@ -13,19 +13,12 @@ app = Flask(__name__)
 
 # Configuración para producción
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
-
 def obtener_planes_de_cuidados(paciente_id):
     conn = get_db_connection()
     return conn.execute(
         "SELECT * FROM planes_de_cuidados WHERE users_id = ? AND status != 'Cancelado' ORDER BY fecha DESC",
         (paciente_id,)
     ).fetchall()
-
-
-from werkzeug.utils import secure_filename
-from datetime import datetime
-
-from helpers import apology, login_required, mxn, valida
 
 def get_db_connection():
     # Usar la base de datos correcta
