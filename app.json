@@ -1,0 +1,25 @@
+{
+  "name": "RegMed - Homecare Electronic Record",
+  "description": "A simple electronic health record system for homecare services",
+  "image": "heroku/python",
+  "repository": "https://github.com/MDerbez/RegMed",
+  "keywords": ["python", "flask", "healthcare", "electronic-health-record", "homecare"],
+  "addons": [],
+  "env": {
+    "SECRET_KEY": {
+      "description": "A secret key for Flask sessions",
+      "generator": "secret"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}

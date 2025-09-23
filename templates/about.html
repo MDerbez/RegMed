@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-info-circle"></i> About RegMed
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-heartbeat fa-4x text-primary mb-3"></i>
+                    <h3>RegMed</h3>
+                    <p class="lead">Homecare Electronic Record System</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-bullseye"></i> Purpose</h5>
+                        <p>RegMed is a simple electronic health record (EHR) system designed specifically for homecare services. It helps healthcare providers manage patient information and medical records efficiently.</p>
+                        
+                        <h5><i class="fas fa-star"></i> Features</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success"></i> Patient Management</li>
+                            <li><i class="fas fa-check text-success"></i> Medical Records Tracking</li>
+                            <li><i class="fas fa-check text-success"></i> Visit Documentation</li>
+                            <li><i class="fas fa-check text-success"></i> Simple Dashboard</li>
+                            <li><i class="fas fa-check text-success"></i> Mobile-Friendly Interface</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-graduation-cap"></i> CS50 Project</h5>
+                        <p>This application was developed as part of the CS50 course project. It demonstrates web development skills using Flask, HTML, CSS, and JavaScript.</p>
+                        
+                        <h5><i class="fas fa-shield-alt"></i> Security Note</h5>
+                        <div class="alert alert-warning">
+                            <small>
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Demo Application:</strong> This is a demonstration version. 
+                                Data is stored in memory and will be lost when the application restarts. 
+                                For production use, implement proper database storage and security measures.
+                            </small>
+                        </div>
+                        
+                        <h5><i class="fas fa-code"></i> Technology Stack</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fab fa-python"></i> Python (Flask)</li>
+                            <li><i class="fab fa-html5"></i> HTML5</li>
+                            <li><i class="fab fa-css3-alt"></i> CSS3 (Bootstrap)</li>
+                            <li><i class="fab fa-js"></i> JavaScript</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="text-center">
+                    <h5><i class="fas fa-rocket"></i> Getting Started</h5>
+                    <p>Begin by adding patients to the system, then document their medical visits and treatments.</p>
+                    <div class="btn-group" role="group">
+                        <a href="{{ url_for('add_patient') }}" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i> Add Patient
+                        </a>
+                        <a href="{{ url_for('add_record') }}" class="btn btn-success">
+                            <i class="fas fa-file-medical-alt"></i> Add Record
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

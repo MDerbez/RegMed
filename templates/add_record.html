@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-file-medical-alt"></i> Add New Medical Record
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="patient_name" class="form-label">Patient Name *</label>
+                                {% if patients %}
+                                    <select class="form-select" id="patient_name" name="patient_name" required>
+                                        <option value="">Select a patient...</option>
+                                        {% for patient in patients %}
+                                            <option value="{{ patient.name }}">{{ patient.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <small class="form-text text-muted">
+                                        Don't see the patient? <a href="{{ url_for('add_patient') }}">Add them first</a>
+                                    </small>
+                                {% else %}
+                                    <input type="text" class="form-control" id="patient_name" name="patient_name" 
+                                           placeholder="Enter patient name" required>
+                                    <small class="form-text text-muted">
+                                        No patients in system. <a href="{{ url_for('add_patient') }}">Add patients first</a>
+                                    </small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="date" class="form-label">Visit Date *</label>
+                                <input type="date" class="form-control" id="date" name="date" 
+                                       value="{{ today }}" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="visit_type" class="form-label">Visit Type *</label>
+                        <select class="form-select" id="visit_type" name="visit_type" required>
+                            <option value="">Select visit type...</option>
+                            <option value="Regular Checkup">Regular Checkup</option>
+                            <option value="Emergency Visit">Emergency Visit</option>
+                            <option value="Follow-up">Follow-up</option>
+                            <option value="Medication Review">Medication Review</option>
+                            <option value="Physical Therapy">Physical Therapy</option>
+                            <option value="Wound Care">Wound Care</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="diagnosis" class="form-label">Diagnosis *</label>
+                        <input type="text" class="form-control" id="diagnosis" name="diagnosis" 
+                               placeholder="Enter primary diagnosis" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="treatment" class="form-label">Treatment</label>
+                        <textarea class="form-control" id="treatment" name="treatment" rows="3"
+                                  placeholder="Describe treatment provided, medications prescribed, etc."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Additional Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3"
+                                  placeholder="Any additional observations, patient concerns, follow-up instructions, etc."></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('list_records') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Records
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Add Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set today's date as default
+document.addEventListener('DOMContentLoaded', function() {
+    const dateInput = document.getElementById('date');
+    if (!dateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+});
+</script>
+{% endblock %}
