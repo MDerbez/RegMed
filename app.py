@@ -1,6 +1,6 @@
 import os
 import sqlite3
-import pyodbc
+
 
 
 
@@ -29,68 +29,8 @@ from datetime import datetime
 from helpers import apology, login_required, mxn, valida
 
 def get_db_connection():
-    
-# Ejemplo de conexión a SQL Server con pyodbc:
-# import pyodbc
-# conn = pyodbc.connect(
-#     'DRIVER={ODBC Driver 17 for SQL Server};'
-#     'SERVER=TU_SERVIDOR;'
-#     'DATABASE=TU_BASE;'
-#     'UID=TU_USUARIO;'
-#     'PWD=TU_CONTRASEÑA'
-# )
-
-    conn = sqlite3.connect("pacientes.db", check_same_thread=False)
+    conn = sqlite3.connect("nombre_de_tu_base_de_datos.db")
     conn.row_factory = sqlite3.Row
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS documentos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            users_id INTEGER NOT NULL,
-            fecha TEXT NOT NULL,
-            tema TEXT NOT NULL,
-            tipo TEXT NOT NULL,
-            comentarios TEXT,
-            filename TEXT NOT NULL
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS prescripciones (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            users_id INTEGER NOT NULL,
-            medicamento TEXT NOT NULL,
-            dosis TEXT NOT NULL,
-            cantidad TEXT NOT NULL,
-            via TEXT NOT NULL,
-            cada_cantidad TEXT NOT NULL,
-            cada_unidad TEXT NOT NULL,
-            unidad_medida TEXT NOT NULL,
-            desde TEXT NOT NULL,
-            durante_cantidad TEXT NOT NULL,
-            durante_unidad TEXT NOT NULL
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS planes_de_cuidados (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            users_id INTEGER NOT NULL,
-            fecha TEXT NOT NULL,
-            riesgo_caidas TEXT,
-            estado_mental TEXT,
-            riesgo_ulceras TEXT,
-            riesgo_pie_diabetico TEXT,
-            heridas TEXT,
-            estomas TEXT,
-            aseo TEXT,
-            medidas_posturales TEXT,
-            balance_liquidos TEXT,
-            dispositivos TEXT,
-            cuidados_via_aerea TEXT,
-            status TEXT NOT NULL DEFAULT 'Pendiente de revisión',
-            comentarios TEXT,
-            detecciones TEXT,
-            acciones TEXT
-        );
-    ''')
     return conn
 
 # Custom filter

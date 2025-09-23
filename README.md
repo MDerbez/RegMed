@@ -23,6 +23,8 @@ This is a web base application to communicate between a patient, the nurse and t
 
 ## Use of AI
 I used copilot from VSCode and CHTA-GTP to help me understand my mistakes and write me some specific functions. Took me a while to understand I had to check with more acuracy what copilot and chat-gpt proposed. I made the terrible mistake of accepting a reorganization proposal from one of this tools. It deleted and rename functionality. Took me some extra hours to get the app up and ruunning again.
+With the infrastructure  I used, to work with sqlite3, I had to import "pyodbc", but I can not use it inside CS50, so it will not run from inside CS50. Instead, it can be run ..........
+
 
 ## Approach
 
