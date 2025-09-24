@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import pyodbc
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -14,167 +15,79 @@ app = Flask(__name__)
 # Configuración para producción
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
 def obtener_planes_de_cuidados(paciente_id):
-    conn = get_db_connection()
-    return conn.execute(
+    return execute_query(
         "SELECT * FROM planes_de_cuidados WHERE users_id = ? AND status != 'Cancelado' ORDER BY fecha DESC",
         (paciente_id,)
-    ).fetchall()
+    )
 
 def get_db_connection():
-    # Usar la base de datos correcta
-    db_path = os.path.join(os.path.dirname(__file__), "pacientes.db")
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    return conn
+    """Conectar a SQL Server Jomquer en servidor local"""
+    try:
+        server = 'LENOVO-MDP\\SQLEXPRESS'
+        database = 'Jomquer'
+        conn_str = f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes'
+        conn = pyodbc.connect(conn_str)
+        return conn
+    except Exception as e:
+        print(f"Error conectando a SQL Server: {e}")
+        raise
+
+def execute_query(query, params=None, fetchone=False):
+    """Ejecutar consulta y retornar resultados como diccionarios para compatibilidad con SQLite"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if params:
+        cursor.execute(query, params)
+    else:
+        cursor.execute(query)
+    
+    if fetchone:
+        row = cursor.fetchone()
+        if row:
+            columns = [column[0] for column in cursor.description]
+            result = dict(zip(columns, row))
+        else:
+            result = None
+    else:
+        rows = cursor.fetchall()
+        columns = [column[0] for column in cursor.description]
+        result = [dict(zip(columns, row)) for row in rows]
+    
+    conn.close()
+    return result
+
+def execute_command(query, params=None):
+    """Ejecutar comando INSERT/UPDATE/DELETE y hacer commit"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    if params:
+        cursor.execute(query, params)
+    else:
+        cursor.execute(query)
+    
+    conn.commit()
+    conn.close()
+
+def get_last_insert_id():
+    """Obtener el ID del último registro insertado (equivalente a last_insert_rowid en SQLite)"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT @@IDENTITY")  # SQL Server equivalent of last_insert_rowid()
+    result = cursor.fetchone()[0]
+    conn.close()
+    return result
 
 def init_database():
-    """Inicializar base de datos SQLite si no existe"""
-    db_path = os.path.join(os.path.dirname(__file__), "pacientes.db")
-    
-    # Si la base de datos no existe, crearla con las tablas básicas
-    if not os.path.exists(db_path):
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        
-        # Crear tabla users
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE NOT NULL,
-                hash TEXT NOT NULL,
-                rol TEXT NOT NULL
-            )
-        ''')
-        
-        # Crear tabla pacientes
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS Pacientes (
-                UsersId INTEGER PRIMARY KEY,
-                NombreCompleto TEXT,
-                Nombre TEXT,
-                PrimerApellido TEXT,
-                SegundoApellido TEXT,
-                FechaNacimiento TEXT,
-                EntidadDeNacimiento TEXT,
-                SexoBiologico TEXT,
-                Genero TEXT,
-                CURP TEXT,
-                Domicilio TEXT,
-                eMailPaciente TEXT,
-                TelefonoPaciente TEXT,
-                WhatsAppPaciente TEXT,
-                PacienteActivo INTEGER DEFAULT 1,
-                FechaUltimoMovimiento TEXT,
-                FOREIGN KEY (UsersId) REFERENCES users (id)
-            )
-        ''')
-        
-        # Crear otras tablas necesarias
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS planes_de_cuidados (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                users_id INTEGER,
-                fecha TEXT,
-                acciones TEXT,
-                detecciones TEXT,
-                estado_mental TEXT,
-                riesgo_caidas TEXT,
-                riesgo_ulceras TEXT,
-                riesgo_pie_diabetico TEXT,
-                heridas TEXT,
-                estomas TEXT,
-                aseo TEXT,
-                medidas_posturales TEXT,
-                balance_liquidos TEXT,
-                dispositivos TEXT,
-                cuidados_via_aerea TEXT,
-                comentarios TEXT,
-                status TEXT DEFAULT 'Activo',
-                FOREIGN KEY (users_id) REFERENCES users (id)
-            )
-        ''')
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS sintomas (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                date TEXT,
-                users_id INTEGER,
-                tipo TEXT,
-                descripcion TEXT,
-                FOREIGN KEY (users_id) REFERENCES users (id)
-            )
-        ''')
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS eventos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                date TEXT,
-                users_id INTEGER,
-                tipo INTEGER,
-                evento TEXT,
-                type INTEGER,
-                FOREIGN KEY (users_id) REFERENCES users (id)
-            )
-        ''')
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS somatometria (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                users_id INTEGER,
-                fecha TEXT,
-                peso REAL,
-                talla REAL,
-                circ_abdominal REAL,
-                temp REAL,
-                sistolica INTEGER,
-                diastolica INTEGER,
-                fcard INTEGER,
-                fresp INTEGER,
-                o2 REAL,
-                glucemia REAL,
-                registrado_por INTEGER,
-                FOREIGN KEY (users_id) REFERENCES users (id),
-                FOREIGN KEY (registrado_por) REFERENCES users (id)
-            )
-        ''')
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS documentos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                users_id INTEGER,
-                fecha TEXT,
-                tema TEXT,
-                tipo TEXT,
-                comentarios TEXT,
-                filename TEXT,
-                FOREIGN KEY (users_id) REFERENCES users (id)
-            )
-        ''')
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS prescripciones (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                users_id INTEGER,
-                medicamento TEXT,
-                dosis TEXT,
-                cantidad TEXT,
-                via TEXT,
-                cada_cantidad TEXT,
-                cada_unidad TEXT,
-                unidad_medida TEXT,
-                desde TEXT,
-                durante_cantidad TEXT,
-                durante_unidad TEXT,
-                vigente TEXT DEFAULT 'Si',
-                FOREIGN KEY (users_id) REFERENCES users (id)
-            )
-        ''')
-        
-        conn.commit()
+    """Verificar conexión a base de datos SQL Server existente"""
+    try:
+        conn = get_db_connection()
         conn.close()
-        print("Base de datos inicializada correctamente")
-    else:
-        print("La base de datos ya existe")
+        print("Conexión a base de datos SQL Server Jomquer verificada correctamente")
+    except Exception as e:
+        print(f"Error conectando a base de datos SQL Server: {e}")
+        raise
 
 # Custom filter
 app.jinja_env.filters["mxn"] = mxn
@@ -187,15 +100,13 @@ Session(app)
 app.config["UPLOAD_FOLDER"] = os.path.join("static", "uploads")
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# Inicializar base de datos al arrancar la aplicación
+# Inicializar/verificar conexión a base de datos al arrancar la aplicación
 init_database()
 
 @app.context_processor
 def inject_username():
     if "user_id" in session:
-        conn = get_db_connection()
-        user = conn.execute("SELECT username FROM users WHERE id = ?", (session["user_id"],)).fetchone()
-        conn.close()
+        user = execute_query("SELECT username FROM users WHERE id = ?", (session["user_id"],), fetchone=True)
         if user:
             return {"username": user["username"]}
     return {}
@@ -213,8 +124,8 @@ def after_request(response):
 def index():
     if session.get("rol") == "enfermeria" and not session.get("paciente_id"):
         return redirect(url_for("seleccionar_paciente"))
-    conn = get_db_connection()
-    user = conn.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
+    
+    user = execute_query("SELECT * FROM users WHERE id = ?", (session["user_id"],), fetchone=True)
     rol = session.get("rol", "").lower()
     paciente = None
     planes_de_cuidados = []
@@ -228,24 +139,23 @@ def index():
  
     if user["rol"] == "supervisor":
         # Mostrar todos los planes de cuidados pendientes
-        planes = conn.execute("""
+        planes = execute_query("""
             SELECT p.*, pa.NombreCompleto
             FROM planes_de_cuidados p
             JOIN Pacientes pa ON p.users_id = pa.usersId
             WHERE p.status = 'Pendiente de revisión'
             ORDER BY p.fecha DESC
-        """).fetchall()
+        """)
         selected_id = request.form.get("expediente_paciente_id")
         if selected_id:
-            paciente = conn.execute("SELECT * FROM Pacientes WHERE usersId = ?", (selected_id,)).fetchone()
-            sintomas = conn.execute("SELECT * FROM sintomas WHERE users_id = ? ORDER BY date DESC", (selected_id,)).fetchall()
-            eventos = conn.execute("SELECT * FROM eventos WHERE users_id = ? ORDER BY date DESC", (selected_id,)).fetchall()
-            somatometria = conn.execute("SELECT * FROM somatometria WHERE users_id = ? ORDER BY fecha DESC", (selected_id,)).fetchall()
-            documentos = conn.execute("SELECT * FROM documentos WHERE users_id = ? ORDER BY fecha DESC", (selected_id,)).fetchall()
-            prescripciones = conn.execute("SELECT * FROM prescripciones WHERE users_id = ? AND vigente != 'No' ORDER BY desde DESC", (selected_id,)).fetchall()
-            autorizaciones = conn.execute("SELECT * FROM eventos WHERE users_id = ? AND tipo = 2 ORDER BY date DESC",(selected_id,)).fetchall()
+            paciente = execute_query("SELECT * FROM Pacientes WHERE usersId = ?", (selected_id,), fetchone=True)
+            sintomas = execute_query("SELECT * FROM sintomas WHERE users_id = ? ORDER BY date DESC", (selected_id,))
+            eventos = execute_query("SELECT * FROM eventos WHERE users_id = ? ORDER BY date DESC", (selected_id,))
+            somatometria = execute_query("SELECT * FROM somatometria WHERE users_id = ? ORDER BY fecha DESC", (selected_id,))
+            documentos = execute_query("SELECT * FROM documentos WHERE users_id = ? ORDER BY fecha DESC", (selected_id,))
+            prescripciones = execute_query("SELECT * FROM prescripciones WHERE users_id = ? AND vigente != 'No' ORDER BY desde DESC", (selected_id,))
+            autorizaciones = execute_query("SELECT * FROM eventos WHERE users_id = ? AND tipo = 2 ORDER BY date DESC", (selected_id,))
         somatometria_registros = somatometria
-        conn.close()
         return render_template(
             "index.html",
             username=user["username"],
@@ -263,19 +173,18 @@ def index():
 
     elif user["rol"] == "enfermeria" and session.get("paciente_id"):
         paciente_id = session["paciente_id"]
-        planes_de_cuidados = conn.execute(
+        planes_de_cuidados = execute_query(
             "SELECT * FROM planes_de_cuidados WHERE users_id = ? AND status != 'Baja' ORDER BY fecha DESC",
             (paciente_id,)
-        ).fetchall()
-        sintomas = conn.execute("SELECT * FROM sintomas WHERE users_id = ?", (paciente_id,)).fetchall()
-        eventos = conn.execute("SELECT * FROM eventos WHERE users_id = ?", (paciente_id,)).fetchall()
-        somatometria = conn.execute("SELECT * FROM somatometria WHERE users_id = ?", (paciente_id,)).fetchall()
-        autorizaciones = conn.execute("SELECT * FROM eventos WHERE users_id = ? AND tipo = 2", (paciente_id,)).fetchall()
-        documentos = conn.execute("SELECT * FROM documentos WHERE users_id = ?", (paciente_id,)).fetchall()
-        prescripciones = conn.execute("SELECT * FROM prescripciones WHERE users_id = ?", (paciente_id,)).fetchall()
-        paciente = conn.execute("SELECT * FROM Pacientes WHERE usersId = ?", (paciente_id,)).fetchone()
+        )
+        sintomas = execute_query("SELECT * FROM sintomas WHERE users_id = ?", (paciente_id,))
+        eventos = execute_query("SELECT * FROM eventos WHERE users_id = ?", (paciente_id,))
+        somatometria = execute_query("SELECT * FROM somatometria WHERE users_id = ?", (paciente_id,))
+        autorizaciones = execute_query("SELECT * FROM eventos WHERE users_id = ? AND tipo = 2", (paciente_id,))
+        documentos = execute_query("SELECT * FROM documentos WHERE users_id = ?", (paciente_id,))
+        prescripciones = execute_query("SELECT * FROM prescripciones WHERE users_id = ?", (paciente_id,))
+        paciente = execute_query("SELECT * FROM Pacientes WHERE usersId = ?", (paciente_id,), fetchone=True)
         somatometria_registros = somatometria
-        conn.close()
         return render_template(
             "index.html",
             username=user["username"],
@@ -292,16 +201,15 @@ def index():
         )
 
     else:
-        paciente = conn.execute("SELECT * FROM Pacientes WHERE usersId = ?", (session["user_id"],)).fetchone()
-        planes_de_cuidados = conn.execute("SELECT * FROM planes_de_cuidados WHERE users_id = ?", (session["user_id"],)).fetchall()
-        sintomas = conn.execute("SELECT * FROM sintomas WHERE users_id = ? ORDER BY date DESC", (session["user_id"],)).fetchall()
-        eventos = conn.execute("SELECT * FROM eventos WHERE users_id = ?", (session["user_id"],)).fetchall()
-        somatometria = conn.execute("SELECT * FROM somatometria WHERE users_id = ? ORDER BY fecha DESC", (session["user_id"],)).fetchall()
-        autorizaciones = conn.execute("SELECT * FROM eventos WHERE users_id = ? AND tipo = 2 ORDER BY date DESC", (session["user_id"],)).fetchall()
-        documentos = conn.execute("SELECT * FROM documentos WHERE users_id = ? ORDER BY fecha DESC", (session["user_id"],)).fetchall()
-        prescripciones = conn.execute("SELECT * FROM prescripciones WHERE users_id = ? and vigente !='No' ORDER BY desde DESC", (session["user_id"],)).fetchall()
+        paciente = execute_query("SELECT * FROM Pacientes WHERE usersId = ?", (session["user_id"],), fetchone=True)
+        planes_de_cuidados = execute_query("SELECT * FROM planes_de_cuidados WHERE users_id = ?", (session["user_id"],))
+        sintomas = execute_query("SELECT * FROM sintomas WHERE users_id = ? ORDER BY date DESC", (session["user_id"],))
+        eventos = execute_query("SELECT * FROM eventos WHERE users_id = ?", (session["user_id"],))
+        somatometria = execute_query("SELECT * FROM somatometria WHERE users_id = ? ORDER BY fecha DESC", (session["user_id"],))
+        autorizaciones = execute_query("SELECT * FROM eventos WHERE users_id = ? AND tipo = 2 ORDER BY date DESC", (session["user_id"],))
+        documentos = execute_query("SELECT * FROM documentos WHERE users_id = ? ORDER BY fecha DESC", (session["user_id"],))
+        prescripciones = execute_query("SELECT * FROM prescripciones WHERE users_id = ? and vigente !='No' ORDER BY desde DESC", (session["user_id"],))
         somatometria_registros = somatometria
-        conn.close()
 
         # Ordenamiento seguro
         planes_de_cuidados = sorted(planes_de_cuidados, key=lambda r: r['fecha'], reverse=True)
@@ -476,9 +384,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
-        conn = get_db_connection()
-        user = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
-        conn.close()
+        user = execute_query("SELECT * FROM users WHERE username = ?", (username,), fetchone=True)
         if user and check_password_hash(user["hash"], password):
             session["user_id"] = user["id"]
             session["rol"] = user["rol"]
@@ -494,17 +400,14 @@ def password():
         old_password = request.form.get("old_password")
         new_password = request.form.get("new_password")
         confirm_password = request.form.get("confirm_password")
-        conn = get_db_connection()
-        user = conn.execute("SELECT * FROM users WHERE id = ?", (session["user_id"],)).fetchone()
+        user = execute_query("SELECT * FROM users WHERE id = ?", (session["user_id"],), fetchone=True)
         if not user or not check_password_hash(user["hash"], old_password):
             flash("La contraseña actual es incorrecta.", "danger")
         elif new_password != confirm_password:
             flash("Las contraseñas nuevas no coinciden.", "danger")
         else:
-            conn.execute("UPDATE users SET hash = ? WHERE id = ?", (generate_password_hash(new_password), session["user_id"]))
-            conn.commit()
+            execute_command("UPDATE users SET hash = ? WHERE id = ?", (generate_password_hash(new_password), session["user_id"]))
             flash("Contraseña actualizada correctamente.", "success")
-        conn.close()
     return render_template("password.html")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -514,11 +417,8 @@ def register():
         password = request.form.get("password")
         rol = request.form.get("rol")
         # Solo crea el usuario
-        conn = get_db_connection()
-        conn.execute("INSERT INTO users (username, hash, rol) VALUES (?, ?, ?)", (username, generate_password_hash(password), rol))
-        user_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
-        conn.commit()
-        conn.close()
+        execute_command("INSERT INTO users (username, hash, rol) VALUES (?, ?, ?)", (username, generate_password_hash(password), rol))
+        user_id = get_last_insert_id()
         # Login automático y redirección
         session["user_id"] = user_id
         session["rol"] = rol

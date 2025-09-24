@@ -1,13 +1,8 @@
 -- Script de migración de RegMed SQLite a SQL Server (Estructura Corregida)
 -- Generado el: 2025-09-24 10:51:18.643717
 
--- Crear base de datos si no existe
-IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'RegMed')
-CREATE DATABASE RegMed;
-GO
-
--- Usar la base de datos
-USE RegMed;
+-- Usar la base de datos existente Jomquer
+USE Jomquer;
 GO
 
 -- Crear estructura de tablas basada en SQLite real
