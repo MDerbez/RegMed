@@ -1,22 +1,13 @@
-"""import os
-
-Archivo app.py básico para Renderimport sqlite3
-
-Redirige a main.py para evitar conflictosimport pyodbc
-
-"""from flask import Flask, flash, redirect, render_template, request, session, url_for
-
-from main import appfrom flask_session import Session
-
+import os
+import sqlite3
+import pyodbc
+from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.utils import secure_filename
+from datetime import datetime
 
-if __name__ == '__main__':from werkzeug.utils import secure_filename
-
-    import osfrom datetime import datetime
-
-    port = int(os.environ.get('PORT', 5000))
-
-    app.run(host='0.0.0.0', port=port)from helpers import apology, login_required, mxn, valida
+from helpers import apology, login_required, mxn, valida
 
 # Configure application
 app = Flask(__name__)
