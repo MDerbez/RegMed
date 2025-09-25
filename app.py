@@ -110,7 +110,7 @@ def init_database():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 date TEXT,
                 users_id INTEGER,
-                tipo INTEGER,
+                tipo TEXT,
                 evento TEXT,
                 type INTEGER,
                 FOREIGN KEY (users_id) REFERENCES users (id)
@@ -404,7 +404,7 @@ def autacceso():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 date TEXT NOT NULL,
                 users_id INTEGER NOT NULL,
-                tipo INTEGER NOT NULL,
+                tipo TEXT NOT NULL,
                 evento TEXT NOT NULL,
                 type INTEGER NOT NULL
             )
@@ -611,8 +611,8 @@ def evento():
     if request.method == "POST":
         fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
         evento = request.form.get("evento")
-        fecha = request.form.get("fecha")  # ← usa "fecha" como en tu input
-        tipo = request.form.get("tipo")   # ← recoge el tipo del formulario
+        fecha = request.form.get("fecha")  
+        tipo = request.form.get("tipo")  
         type_value = 1 if tipo == "evento" else 2 if tipo == "autorizacion" else 0
         if not fecha:
             fecha = datetime.now().strftime('%Y-%m-%dT%H:%M')
