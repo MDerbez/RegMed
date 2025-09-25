@@ -241,10 +241,9 @@ def index():
 @app.route("/datospersonales", methods=["GET", "POST"])
 @login_required
 def datospersonales():
-    conn = get_db_connection()
-    paciente = conn.execute(
-        "SELECT * FROM Pacientes WHERE usersId = ?", (session["user_id"],)
-    ).fetchone()
+    paciente = execute_query(
+        "SELECT * FROM Pacientes WHERE usersId = ?", (session["user_id"],), fetchone=True
+    )
 
     if request.method == "POST":
         nombre = request.form.get("Nombre")
@@ -256,7 +255,7 @@ def datospersonales():
 
         # Si ya existe, actualiza
         if paciente:
-            conn.execute(
+            execute_command(
                 """UPDATE Pacientes SET
                     NombreCompleto = ?, Nombre = ?, PrimerApellido = ?, SegundoApellido = ?, FechaNacimiento = ?,
                     EntidadDeNacimiento = ?, SexoBiologico = ?, Genero = ?, CURP = ?, Domicilio = ?, eMailPaciente = ?,
@@ -272,7 +271,7 @@ def datospersonales():
             )
         # Si no existe, inserta
         else:
-            conn.execute(
+            execute_command(
                 """INSERT INTO Pacientes (
                     UsersId, NombreCompleto, Nombre, PrimerApellido, SegundoApellido, FechaNacimiento,
                     EntidadDeNacimiento, SexoBiologico, Genero, CURP, Domicilio, eMailPaciente,
@@ -286,20 +285,15 @@ def datospersonales():
                     request.form.get("WhatsAppPaciente"), 1, datetime.now().strftime("%Y-%m-%dT%H:%M")
                 )
             )
-        conn.commit()
-        conn.close()
         return redirect("/")
 
     # GET: mostrar formulario con datos si existen
     datos = dict(paciente) if paciente else {}
-    conn.close()
     return render_template("datospersonales.html", datos=datos)
 
 @app.route("/autacceso", methods=["GET", "POST"])
 @login_required
 def autacceso():
-    conn = get_db_connection()
-
     # POST: guardar autorización
     if request.method == "POST":
         correo = request.form.get("correo")
@@ -307,31 +301,18 @@ def autacceso():
             return apology("Debe ingresar un correo válido", 400)
 
         # Guardar en tabla eventos como tipo 2 (autorización)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS eventos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                date TEXT NOT NULL,
-                users_id INTEGER NOT NULL,
-                tipo INTEGER NOT NULL,
-                evento TEXT NOT NULL,
-                type INTEGER NOT NULL
-            )
-        """)
-        conn.execute(
+        # Nota: La tabla eventos ya existe en SQL Server, no necesitamos crearla
+        execute_command(
             "INSERT INTO eventos (date, users_id, tipo, evento, type) VALUES (?, ?, ?, ?, ?)",
             (datetime.now(), session["user_id"], 2, f"Autorización para {correo}", 0)
         )
-        conn.commit()
         return redirect("/autacceso")  # redirige al mismo formulario para mostrar lista
 
     # GET: mostrar formulario y lista de autorizaciones
-    autorizaciones = conn.execute(
+    autorizaciones = execute_query(
         "SELECT * FROM eventos WHERE users_id = ? AND tipo = 2",
         (session["user_id"],)
-    ).fetchall()
-    conn.close()
-
-    autorizaciones = [dict(row) for row in autorizaciones]
+    )
     return render_template("autacceso.html", autorizaciones=autorizaciones)
 
 @app.route("/editar_ultimo_enfermeria", methods=["POST"])
@@ -352,8 +333,8 @@ def editar_ultimo_enfermeria():
     dispositivos = request.form.get("dispositivos")
     cuidados_via_aerea = request.form.get("cuidados_via_aerea")
     comentario_nuevo = request.form.get("comentario_nuevo")
-    conn = get_db_connection()
-    conn.execute("""
+    
+    execute_command("""
         UPDATE planes_de_cuidados SET
             acciones = ?,
             detecciones = ?,
@@ -368,15 +349,13 @@ def editar_ultimo_enfermeria():
             balance_liquidos = ?,
             dispositivos = ?,
             cuidados_via_aerea = ?,
-            comentarios = COALESCE(comentarios, '') || '\n' || ?
+            comentarios = COALESCE(comentarios, '') + CHAR(10) + ?
         WHERE id = ?
     """, (
         acciones, detecciones, estado_mental, riesgo_caidas, riesgo_ulceras,
         riesgo_pie_diabetico, heridas, estomas, aseo, medidas_posturales,
         balance_liquidos, dispositivos, cuidados_via_aerea, comentario_nuevo, plan_id
     ))
-    conn.commit()
-    conn.close()
     return redirect("/")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -438,7 +417,7 @@ def registro_enfermeria():
     rol = session.get("rol")  # ← agrega esto
     if not paciente_id:
         return redirect(url_for("seleccionar_paciente"))
-    conn = get_db_connection()
+        
     if request.method == "POST":
         # Recoge los datos del formulario
         acciones = request.form.get("acciones")
@@ -457,7 +436,7 @@ def registro_enfermeria():
         comentarios = request.form.get("comentarios")
         fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
         # Guarda el nuevo plan
-        conn.execute("""
+        execute_command("""
             INSERT INTO planes_de_cuidados (
                 users_id, fecha, acciones, detecciones, estado_mental, riesgo_caidas, riesgo_ulceras,
                 riesgo_pie_diabetico, heridas, estomas, aseo, medidas_posturales, balance_liquidos,
@@ -468,18 +447,13 @@ def registro_enfermeria():
             riesgo_pie_diabetico, heridas, estomas, aseo, medidas_posturales, balance_liquidos,
             dispositivos, cuidados_via_aerea, comentarios
         ))
-        conn.commit()
-        conn.close()
         return redirect(url_for("index"))
-    conn.close()
     return render_template("registro_enfermeria.html", paciente_id=paciente_id, rol=rol)
 
 @app.route("/seleccionar_paciente", methods=["GET", "POST"])
 @login_required
 def seleccionar_paciente():
-    conn = get_db_connection()
-    pacientes = conn.execute("SELECT usersid, NombreCompleto FROM pacientes").fetchall()
-    conn.close()
+    pacientes = execute_query("SELECT usersid, NombreCompleto FROM pacientes")
     if request.method == "POST":
         paciente_id = request.form.get("paciente_id")
         session["paciente_id"] = paciente_id
@@ -491,15 +465,12 @@ def seleccionar_paciente():
 def sintomas():
     if session.get("rol") != "paciente":
         return apology("Acceso restringido", 403)
-    conn = get_db_connection()
     if request.method == "POST":
         tipo = request.form.get("tipo")
         descripcion = request.form.get("descripcion")
-        conn.execute("INSERT INTO sintomas (date, users_id, tipo, descripcion) VALUES (?, ?, ?, ?)",
-                     (datetime.now(), session["user_id"], tipo, descripcion))
-        conn.commit()
-    sintomas = conn.execute("SELECT * FROM sintomas WHERE users_id = ?", (session["user_id"],)).fetchall()
-    conn.close()
+        execute_command("INSERT INTO sintomas (date, users_id, tipo, descripcion) VALUES (?, ?, ?, ?)",
+                       (datetime.now(), session["user_id"], tipo, descripcion))
+    sintomas = execute_query("SELECT * FROM sintomas WHERE users_id = ?", (session["user_id"],))
     return render_template("sintomas.html", sintomas=sintomas)
 
 @app.route("/evento", methods=["GET", "POST"])
@@ -507,7 +478,6 @@ def sintomas():
 def evento():
     if session.get("rol") != "paciente":
         return apology("Acceso restringido", 403)
-    conn = get_db_connection()
     if request.method == "POST":
         fecha = datetime.now().strftime("%Y-%m-%d %H:%M")
         evento = request.form.get("evento")
@@ -516,11 +486,9 @@ def evento():
         type_value = 1 if tipo == "evento" else 2 if tipo == "autorizacion" else 0
         if not fecha:
             fecha = datetime.now().strftime('%Y-%m-%dT%H:%M')
-        conn.execute("INSERT INTO eventos (users_id, evento, date, tipo, type) VALUES (?, ?, ?, ?, ?)",
-                     (session["user_id"], evento, fecha, tipo, type_value))
-        conn.commit()
-    eventos = conn.execute("SELECT * FROM eventos WHERE users_id = ?", (session["user_id"],)).fetchall()
-    conn.close()
+        execute_command("INSERT INTO eventos (users_id, evento, date, tipo, type) VALUES (?, ?, ?, ?, ?)",
+                       (session["user_id"], evento, fecha, tipo, type_value))
+    eventos = execute_query("SELECT * FROM eventos WHERE users_id = ?", (session["user_id"],))
     fecha_hoy = datetime.now().strftime('%Y-%m-%dT%H:%M')
     return render_template("evento.html", eventos=eventos, fecha_hoy=fecha_hoy)
 
@@ -530,11 +498,12 @@ def somatometria():
     if session.get("rol") not in ["paciente", "enfermeria"]:
         return apology("Acceso restringido", 403)
     fecha_hoy = datetime.now().strftime('%Y-%m-%dT%H:%M')
-    conn = get_db_connection()
+    
     if session.get("rol") == "enfermeria":
         paciente_id = session.get("paciente_id")
     else:
         paciente_id = session["user_id"]
+        
     if request.method == "POST":
         peso = request.form.get("peso")
         talla = request.form.get("talla")
@@ -551,13 +520,12 @@ def somatometria():
             imc = round(float(peso) / (float(talla) / 100) ** 2, 2) if peso and talla else None
         except Exception:
             imc = None
-        conn.execute("""INSERT INTO somatometria 
+        execute_command("""INSERT INTO somatometria 
             (users_id, fecha, peso, talla, circ_abdominal, temp, sistolica, diastolica, fcard, fresp, o2, glucemia, registrado_por) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (paciente_id, fecha, peso, talla, circ_abdominal, temp, sistolica, diastolica, fcard, fresp, o2, glucemia, session["user_id"]))
-        conn.commit()
-    registros = conn.execute("SELECT * FROM somatometria WHERE users_id = ?  ORDER BY fecha DESC", (session["user_id"],)).fetchall()
-    conn.close()
+    
+    registros = execute_query("SELECT * FROM somatometria WHERE users_id = ? ORDER BY fecha DESC", (session["user_id"],))
     return render_template("somatometria.html", registros=registros, fecha_hoy=fecha_hoy)
 
 @app.route("/documentos", methods=["GET", "POST"])
@@ -565,7 +533,6 @@ def somatometria():
 def documentos():
     if session.get("rol") != "paciente":
         return apology("Acceso restringido", 403)
-    conn = get_db_connection()
     if request.method == "POST":
         fecha = request.form.get("fecha")
         tipo = request.form.get("tipo")
@@ -575,15 +542,13 @@ def documentos():
         if archivo and tema and fecha and tipo:
             filename = secure_filename(archivo.filename)
             archivo.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-            conn.execute(
+            execute_command(
                 "INSERT INTO documentos (users_id, fecha, tema, tipo, comentarios, filename) VALUES (?, ?, ?, ?, ?, ?)",
                 (session["user_id"], datetime.now().strftime("%Y-%m-%d %H:%M"), tema, tipo, comentarios, filename)
             )
-            conn.commit()
         else:
             flash("Por favor, completa todos los campos requeridos.", "danger")
-    documentos = conn.execute("SELECT * FROM documentos WHERE users_id = ?", (session["user_id"],)).fetchall()
-    conn.close()
+    documentos = execute_query("SELECT * FROM documentos WHERE users_id = ?", (session["user_id"],))
     return render_template("documentos.html", documentos=documentos)
 
 @app.route("/prescripciones", methods=["GET", "POST"])
@@ -591,7 +556,6 @@ def documentos():
 def prescripciones():
     if session.get("rol") not in ["paciente", "enfermeria"]:
         return apology("Acceso restringido", 403)
-    conn = get_db_connection()
     if request.method == "POST":
         if session.get("rol") == "enfermeria":
             usuario_id = session.get("paciente_id")
@@ -607,15 +571,13 @@ def prescripciones():
         desde = request.form.get("desde")
         durante_cantidad = request.form.get("durante_cantidad")
         durante_unidad = request.form.get("durante_unidad")
-        conn.execute(
+        execute_command(
             "INSERT INTO prescripciones (users_id, medicamento, dosis, cantidad, via, cada_cantidad, cada_unidad, unidad_medida, desde, durante_cantidad, durante_unidad, vigente) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (usuario_id, medicamento, dosis, cantidad, via, cada_cantidad, cada_unidad, unidad_medida, desde, durante_cantidad, durante_unidad, "Si")
         )
-        conn.commit()
-    prescripciones = conn.execute(
+    prescripciones = execute_query(
         "SELECT * FROM prescripciones WHERE users_id = ?", (session["user_id"],)
-    ).fetchall()
-    conn.close()
+    )
     return render_template("prescripciones.html", prescripciones=prescripciones, now=datetime.now())
 
 
@@ -631,37 +593,32 @@ def validar_ultimo():
     comentario = request.form.get("comentario")
     status = request.form.get("status")
     accion = request.form.get("accion")
-    conn = get_db_connection()
+    
     if accion == "cancelar":
         # Da de baja el plan (puedes cambiar el status o eliminar el registro)
-        conn.execute("UPDATE planes_de_cuidados SET status = ? WHERE id = ?", ("Baja", plan_id))
+        execute_command("UPDATE planes_de_cuidados SET status = ? WHERE id = ?", ("Baja", plan_id))
         flash("El plan fue dado de baja.", "danger")
     else:
-        conn.execute(
-            "UPDATE planes_de_cuidados SET comentarios = COALESCE(comentarios, '') || '\n' || ?, status = ? WHERE id = ?",
+        execute_command(
+            "UPDATE planes_de_cuidados SET comentarios = COALESCE(comentarios, '') + CHAR(10) + ?, status = ? WHERE id = ?",
             (comentario, status, plan_id)
         )
         flash("Cambios guardados correctamente.", "success")
-    conn.commit()
-    conn.close()
     return redirect(url_for("index"))
 
 def registrar_usuario(username, password, rol, nombre_completo):
-    conn = get_db_connection()
     # Insertar en users
-    conn.execute(
+    execute_command(
         "INSERT INTO users (username, hash, rol) VALUES (?, ?, ?)",
         (username, password, rol)
     )
-    user_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    user_id = get_last_insert_id()
     # Si es paciente, insertar en pacientes
     if rol == "paciente":
-        conn.execute(
+        execute_command(
             "INSERT INTO pacientes (usersid, NombreCompleto) VALUES (?, ?)",
             (user_id, nombre_completo)
         )
-    conn.commit()
-    conn.close()
 
 @app.route("/init-database")
 def init_database_route():
