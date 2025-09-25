@@ -1,6 +1,10 @@
 import os
 import sqlite3
-import pyodbc
+try:
+    import pyodbc
+    PYODBC_AVAILABLE = True
+except ImportError:
+    PYODBC_AVAILABLE = False
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -42,11 +46,14 @@ def get_db_connection():
     conn = None
     is_sql_server = False
     try:
-        # Intentar conectar a SQL Server primero
-        connection_string = get_sql_server_connection_string()
-        conn = pyodbc.connect(connection_string)
-        is_sql_server = True
-        yield conn, is_sql_server
+        # Intentar conectar a SQL Server primero solo si pyodbc está disponible
+        if PYODBC_AVAILABLE:
+            connection_string = get_sql_server_connection_string()
+            conn = pyodbc.connect(connection_string)
+            is_sql_server = True
+            yield conn, is_sql_server
+        else:
+            raise Exception("pyodbc not available")
     except Exception as sql_error:
         print(f"Error conectando a SQL Server: {sql_error}")
         print("Usando SQLite como fallback...")
