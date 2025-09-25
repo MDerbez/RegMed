@@ -9,6 +9,7 @@ from datetime import datetime
 from helpers import apology, login_required, mxn, valida
 
 # Configure application
+# Templates moved to standard location: templates/
 app = Flask(__name__)
 
 # Configuración para producción
