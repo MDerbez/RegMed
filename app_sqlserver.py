@@ -504,6 +504,15 @@ def init_database_route():
     except Exception as e:
         return f"Error al inicializar base de datos: {str(e)}", 500
 
+@app.route("/health")
+def health_check():
+    """Endpoint simple para verificar que la aplicación está funcionando"""
+    return {
+        "status": "OK", 
+        "message": "RegMed is running",
+        "pyodbc_available": PYODBC_AVAILABLE
+    }, 200
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
