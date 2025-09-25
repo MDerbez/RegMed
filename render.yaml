@@ -3,7 +3,7 @@ services:
     name: regmed
     env: python
     plan: free
-    buildCommand: pip install flask gunicorn
+    buildCommand: pip install flask gunicorn flask-session werkzeug pytz
     startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
