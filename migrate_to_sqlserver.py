@@ -178,7 +178,7 @@ if __name__ == "__main__":
     # Configurar conexión a SQL Server
     # Cambia estos valores por los de tu servidor SQL
     server = 'tu_servidor'
-    database = 'RegMed'
+    database = 'Jomquer'
     username = 'tu_usuario'  
     password = 'tu_password'
     

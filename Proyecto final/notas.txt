@@ -1,5 +1,5 @@
 Diapositiva 1:
-Proyecto RegMed para curso CS50
+Proyecto Jomquer para curso CS50
 
 Diapositiva 2:
 La pantalla inicial permite ingresar las credenciales de usuario, o registrar una nueva cuenta

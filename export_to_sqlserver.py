@@ -16,10 +16,10 @@ def export_sqlite_to_sql():
     cursor = conn.cursor()
     
     # Crear archivo SQL de salida
-    output_file = f"export_regmed_{datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
+    output_file = f"export_jomquer_{datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
     
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write("-- Script de migración de RegMed SQLite a SQL Server\n")
+        f.write("-- Script de migración de Jomquer SQLite a SQL Server\n")
         f.write(f"-- Generado el: {datetime.now()}\n\n")
         
         # Crear estructura de tablas para SQL Server

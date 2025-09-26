@@ -62,7 +62,7 @@ def verificar_tablas():
                 print(f"   - {tabla}")
         else:
             print("⚠️ No hay tablas en la base de datos 'Jomquer'")
-            print("💡 Debes ejecutar el script SQL de migración: export_regmed_corrected_20250924_105118.sql")
+            print("💡 Debes ejecutar el script SQL de migración: export_jomquer_corrected_20250924_105118.sql")
         
         return tablas
         

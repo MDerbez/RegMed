@@ -832,7 +832,7 @@ def health_check():
     """Endpoint simple para verificar que la aplicación está funcionando"""
     return {
         "status": "OK", 
-        "message": "RegMed is running",
+        "message": "Jomquer is running",
         "pyodbc_available": PYODBC_AVAILABLE
     }, 200
 

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: regmed
+    name: jomquer
     env: python
     plan: free
     buildCommand: pip install flask gunicorn flask-session werkzeug pytz

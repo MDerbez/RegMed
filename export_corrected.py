@@ -16,15 +16,15 @@ def export_sqlite_to_sql_correct():
     cursor = conn.cursor()
     
     # Crear archivo SQL de salida
-    output_file = f"export_regmed_corrected_{datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
+    output_file = f"export_jomquer_corrected_{datetime.now().strftime('%Y%m%d_%H%M%S')}.sql"
     
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write("-- Script de migración de RegMed SQLite a SQL Server (Estructura Corregida)\n")
+        f.write("-- Script de migración de Jomquer SQLite a SQL Server (Estructura Corregida)\n")
         f.write(f"-- Generado el: {datetime.now()}\n\n")
         
         # Crear estructura de tablas para SQL Server basada en la estructura real
         f.write("""-- Crear estructura de tablas basada en SQLite real
-USE RegMed;
+USE Jomquer;
 GO
 
 -- Tabla users
